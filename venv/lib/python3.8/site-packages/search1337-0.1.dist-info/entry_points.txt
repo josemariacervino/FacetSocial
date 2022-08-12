@@ -1,0 +1,3 @@
+[console_scripts]
+search1337 = 1337.call:main
+
