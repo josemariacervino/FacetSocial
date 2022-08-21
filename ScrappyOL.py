@@ -31,27 +31,28 @@ def ScrappyOL():
 
     def parse(self, response):
         sel = Selector(response)
-        oferta = sel.xpath("//div[@id='primary']//div[@class='entry-content']//article[contains(@id, 'post-')][1]")
+        listaOfertas = sel.xpath("//div[@id='primary']//div[@class='entry-content']//article[contains(@id, 'post-')]")
+        
         i = 0
-
-        o = oferta
-        item = ItemLoader(Oferta(), o)
-
-        item.add_value("id", i)
-        item.add_xpath("link",".//h1/a/@href")
-        item.add_xpath("titulo", ".//h1/a/text()")
-        item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
-
-        x = o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-
-        if x == []:
-            item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
-        else:
-            item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-
-        i += 1
-
-        yield item.load_item()
+        for o in listaOfertas:
+        
+          item = ItemLoader(Oferta(), o)
+  
+          item.add_value("id", i)
+          item.add_xpath("link",".//h1/a/@href")
+          item.add_xpath("titulo", ".//h1/a/text()")
+          item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
+  
+          x = o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
+  
+          if x == []:
+              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
+          else:
+              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
+  
+          i += 1
+  
+          yield item.load_item()
 
 
 #CORRIENDO SCRAPY SIN LA TERMINAL

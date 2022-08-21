@@ -11,6 +11,9 @@ client = discord.Client()
 global LastPPS 
 LastPPS = "B\u00fasqueda de Pasantes \u2013 Direcci\u00f3n General de Catastro"
 
+global LastOL 
+LastOL = "B\u00fasqueda Laboral Ingenieros de Aplicaciones \u2013 Fluence"
+
 
 @client.event
 async def on_message(message):
@@ -22,11 +25,15 @@ async def on_message(message):
   message_content = message.content.lower()  
   
   if message.content.startswith(f'$hello'):
-    await message.channel.send('Buenas Buenassss,buenos dias grupo......Ahi se va Simon que no festeja la navidad por que su familia es juRia')
+    await message.channel.send('Buenos dias, soy un Bot que te mantiene al tanto de las ultimas noticias!!')
     
   if f'$search' in message_content:
+    await message.channel.send("Ultima Pasatia y PPS:")
     await message.channel.send(LastPPS)
+    await message.channel.send("Ultima Oferta Laboral:")
+    await message.channel.send(LastOL)
     
+
 
 
 @tasks.loop(seconds=60)
@@ -35,33 +42,44 @@ async def ofertasLaborales():
   channel = client.get_channel(1008524480089436261)  
   
   ScrappyOL()
-  #sl = '. . . . . . .\n'
   des=""
+  global LastOL
   
   ruta = 'ofertas.json'
   with open(ruta) as contenido:
     
     ofertas = json.load(contenido)
 
-    oferta = ofertas[0]
-    titulo = "".join(oferta["titulo"][0])
-    fecha = "".join(oferta["fecha"][0])
-    link = "".join(oferta["link"][0])
-    
-    descripcion = oferta["descripcion"]
+    for oferta in ofertas:
+      of = oferta
+      titulo = "".join(of["titulo"])
 
-    for d in descripcion:
-      if('\u2022' in d):
-        des = des + "\n" + d
-      elif (':' in d):
-        des = des + d + "\n"
+      if (titulo != LastOL):
+        
+        fecha = "".join(of["fecha"])
+        link = "".join(of["link"])
+        descripcion = of["descripcion"]
+    
+        for d in descripcion:
+          if('\u2022' in d):
+            des = des + "\n" + d
+          elif (':' in d):
+            des = des + d + "\n"
+          else:
+            des = des + d
+    
+        msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
+    
+        des=""
+        await channel.send(msgOL)
+
       else:
-        des = des + d
-
-    msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-
-    await channel.send(msgOL)
+        of = ofertas[0]
+        titulo = of["titulo"][0]
+        LastOL = titulo
+        break
     
+
 
 
 @tasks.loop(seconds=60)
@@ -98,6 +116,7 @@ async def pasantias():
     
         msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
     
+        des=""
         await channel.send(msgPPS)
 
       else:
@@ -108,10 +127,13 @@ async def pasantias():
 
 
 
+
+
 @client.event
 async def on_ready():
   print(f'{client.user} is now online!')
   ofertasLaborales.start()
   pasantias.start()
+
 
 client.run("MTAwNTU3NTE2NDcwMTk2NjM5Nw.GEcqgj.Mjaad4g-s70XGZ0XNNUbIGmNDjDOgUrw5-p7Zk")
