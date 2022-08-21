@@ -31,30 +31,28 @@ def ScrappyPPS():
 
     def parse(self, response):
         sel = Selector(response)
-        pasantia = sel.xpath("//div[@id='panel-194-0-0-0']//article[contains(@id, 'post-')][1]")
-
-        p= pasantia
+        listaPasantia = sel.xpath("//div[@id='panel-194-0-0-0']//article[contains(@id, 'post-')]")
 
         i = 0
-
-
-        item = ItemLoader(Pasantia(), p)
-
-        item.add_value("id", i)
-        item.add_xpath("link", ".//h1/a/@href")
-        item.add_xpath("titulo", ".//h1/a/text()")
-        item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
-
-        x = p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-
-        if x == []:
-            item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
-        else:
-            item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-
-        i += 1
-
-        yield item.load_item()
+        
+        for p in listaPasantia:
+          item = ItemLoader(Pasantia(), p)
+  
+          item.add_value("id", i)
+          item.add_xpath("link", ".//h1/a/@href")
+          item.add_xpath("titulo", ".//h1/a/text()")
+          item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
+  
+          x = p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
+  
+          if x == []:
+              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
+          else:
+              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
+  
+          i += 1
+  
+          yield item.load_item()
 
 
 #CORRIENDO SCRAPY SIN LA TERMINAL

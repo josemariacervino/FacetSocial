@@ -7,12 +7,15 @@ from discord.ext import tasks
 
  
 client = discord.Client()
-global tituloOLD 
-tituloOLD = "B\u00fasqueda de Pasantes \u2013 Direcci\u00f3n General de Catastro"
+
+global LastPPS 
+LastPPS = "B\u00fasqueda de Pasantes \u2013 Direcci\u00f3n General de Catastro"
 
 
 @client.event
-async def on_message(message): 
+async def on_message(message):
+  global LastPPS
+  
   if message.author == client.user:
       return  
   # lower case message
@@ -21,25 +24,10 @@ async def on_message(message):
   if message.content.startswith(f'$hello'):
     await message.channel.send('Buenas Buenassss,buenos dias grupo......Ahi se va Simon que no festeja la navidad por que su familia es juRia')
     
-  '''if f'$search' in message_content:
-    ScrappyOL()
+  if f'$search' in message_content:
+    await message.channel.send(LastPPS)
     
-    ruta = 'ofertas.json'
-    with open(ruta) as contenido:
-      ofertas = json.load(contenido)
 
-      for oferta in ofertas:
-        titulo = oferta["titulo"][0]
-        fecha = oferta["fecha"][0]
-        descripcion = oferta["descripcion"]
-        
-        await message.channel.send(titulo)
-        await message.channel.send(fecha)
-        
-        #for des in descripcion:
-         # await message.channel.send(des)
-      
-      await message.channel.send(f'\n═════════════')'''
 
 @tasks.loop(seconds=60)
 async def ofertasLaborales():
@@ -75,6 +63,7 @@ async def ofertasLaborales():
     await channel.send(msgOL)
     
 
+
 @tasks.loop(seconds=60)
 async def pasantias():
   
@@ -82,31 +71,41 @@ async def pasantias():
   
   ScrappyPPS()
   des=""
+  global LastPPS 
   
   ruta = 'pasantias.json'
   with open(ruta) as contenido:
     
     pasantias = json.load(contenido)
     
-    pasantia = pasantias[0]
-    titulo = "".join(pasantia["titulo"][0])
-    fecha = "".join(pasantia["fecha"][0])
-    link = "".join(pasantia["link"][0])
-    
-    descripcion = pasantia["descripcion"]
+    for pasantia in pasantias:
+      pas = pasantia
+      titulo = "".join(pas["titulo"])
 
-    for d in descripcion:
-      if ('\u2022' in d):
-        des = des + "\n" + d
-      elif (':' in d):
-        des = des + d + "\n"  
+      if (titulo != LastPPS):
+        
+        fecha = "".join(pas["fecha"])
+        link = "".join(pas["link"])
+        descripcion = pas["descripcion"]
+    
+        for d in descripcion:
+          if ('\u2022' in d):
+            des = des + "\n" + d
+          elif (':' in d):
+            des = des + d + "\n"  
+          else:
+            des = des + d
+    
+        msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
+    
+        await channel.send(msgPPS)
+
       else:
-        des = des + d
+        pas = pasantias[0]
+        titulo = pas["titulo"][0]
+        LastPPS = titulo
+        break
 
-    msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-
-    await channel.send(msgPPS)
-    
 
 
 @client.event
