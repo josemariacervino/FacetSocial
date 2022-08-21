@@ -12,37 +12,40 @@ from os import remove
 from scrapy.exceptions import CloseSpider
 from multiprocessing.context import Process
 
-def ScrappyOL():
+def ScrappyPPS():
   
-  class Oferta(Item):
+  class Pasantia(Item):
     id = Field()
     link = Field()
     titulo = Field()
     fecha = Field()
     descripcion = Field()
 
-  class FIOfertasLaboralesSpider(Spider):
-    name = "OfertasSpider"
+  class FIPasantiasSpider(Spider):
+    name = "PasantiasSpider"
 
     custom_settings = {
-        "USER-AGENT":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36"
+        "USER-AGENT":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/71.0.3578.80 Chrome/71.0.3578.80 Safari/537.36"
     }
-    start_urls = ['https://www.facet.unt.edu.ar/sbe/ofertas-laborales/']
+    start_urls = ['https://www.facet.unt.edu.ar/sbe/pasantias-y-pps/']
 
     def parse(self, response):
         sel = Selector(response)
-        oferta = sel.xpath("//div[@id='primary']//div[@class='entry-content']//article[contains(@id, 'post-')][1]")
+        pasantia = sel.xpath("//div[@id='panel-194-0-0-0']//article[contains(@id, 'post-')][1]")
+
+        p= pasantia
+
         i = 0
 
-        o = oferta
-        item = ItemLoader(Oferta(), o)
+
+        item = ItemLoader(Pasantia(), p)
 
         item.add_value("id", i)
-        item.add_xpath("link",".//h1/a/@href")
+        item.add_xpath("link", ".//h1/a/@href")
         item.add_xpath("titulo", ".//h1/a/text()")
         item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
 
-        x = o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
+        x = p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
 
         if x == []:
             item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
@@ -56,7 +59,7 @@ def ScrappyOL():
 
 #CORRIENDO SCRAPY SIN LA TERMINAL
 
-  archivo = "ofertas.json"
+  archivo = "pasantias.json"
 
   if (os.path.isfile(archivo)):
     remove(archivo)
@@ -64,11 +67,11 @@ def ScrappyOL():
   def crawl():
     crawler = CrawlerProcess({
       'FEED_FORMAT': 'json',
-      'FEED_URI': 'ofertas.json'
+      'FEED_URI': 'pasantias.json'
     })
-    crawler.crawl(FIOfertasLaboralesSpider)
+    crawler.crawl(FIPasantiasSpider)
     crawler.start()
   
-  processOL = Process(target=crawl)
-  processOL.start()
-  processOL.join()
+  processPPS = Process(target=crawl)
+  processPPS.start()
+  processPPS.join()
