@@ -1,23 +1,25 @@
 import discord
 import os
 from ScrappyOL import ScrappyOL
+from ScrappyOL import ScrappyOLInicial
 from ScrappyPPS import ScrappyPPS
+from ScrappyPPS import ScrappyPPSInicial
 import json
 from discord.ext import tasks
 
  
 client = discord.Client()
 
-global LastPPS 
-LastPPS = "B\u00fasqueda de Pasantes \u2013 Direcci\u00f3n General de Catastro"
+global ultimaPPS 
+ultimaPPS = ""
 
-global LastOL 
-LastOL = "B\u00fasqueda Laboral Ingenieros de Aplicaciones \u2013 Fluence"
+global ultimaOL
+ultimaOL = ""
 
 
 @client.event
 async def on_message(message):
-  global LastPPS
+  global ultimaPPS
   
   if message.author == client.user:
       return  
@@ -29,21 +31,19 @@ async def on_message(message):
     
   if f'$search' in message_content:
     await message.channel.send("Ultima Pasatia y PPS:")
-    await message.channel.send(LastPPS)
+    await message.channel.send(ultimaPPS)
     await message.channel.send("Ultima Oferta Laboral:")
-    await message.channel.send(LastOL)
+    await message.channel.send(ultimaOL)
     
 
-
-
-@tasks.loop(seconds=60)
+@tasks.loop(seconds=1800)
 async def ofertasLaborales():
   
   channel = client.get_channel(1008524480089436261)  
   
   ScrappyOL()
   des=""
-  global LastOL
+  global ultimaOL
   
   ruta = 'ofertas.json'
   with open(ruta) as contenido:
@@ -54,7 +54,7 @@ async def ofertasLaborales():
       of = oferta
       titulo = "".join(of["titulo"])
 
-      if (titulo != LastOL):
+      if (titulo != ultimaOL):
         
         fecha = "".join(of["fecha"])
         link = "".join(of["link"])
@@ -69,27 +69,29 @@ async def ofertasLaborales():
             des = des + d
     
         msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-    
+
+        
         des=""
         await channel.send(msgOL)
 
       else:
         of = ofertas[0]
         titulo = of["titulo"][0]
-        LastOL = titulo
+        ultimaOL = titulo
         break
     
 
 
 
-@tasks.loop(seconds=60)
+
+@tasks.loop(seconds=1800)
 async def pasantias():
   
   channel = client.get_channel(1008524529171185776)  
   
   ScrappyPPS()
   des=""
-  global LastPPS 
+  global ultimaPPS 
   
   ruta = 'pasantias.json'
   with open(ruta) as contenido:
@@ -100,7 +102,7 @@ async def pasantias():
       pas = pasantia
       titulo = "".join(pas["titulo"])
 
-      if (titulo != LastPPS):
+      if (titulo != ultimaPPS):
         
         fecha = "".join(pas["fecha"])
         link = "".join(pas["link"])
@@ -122,10 +124,8 @@ async def pasantias():
       else:
         pas = pasantias[0]
         titulo = pas["titulo"][0]
-        LastPPS = titulo
+        ultimaPPS = titulo
         break
-
-
 
 
 
@@ -134,6 +134,13 @@ async def on_ready():
   print(f'{client.user} is now online!')
   ofertasLaborales.start()
   pasantias.start()
+
+  global ultimaPPS
+  ultimaPPS = ScrappyPPSInicial()
+  global ultimaOL
+  ultimaOL = ScrappyOLInicial()
+  
+  
 
 
 client.run("MTAwNTU3NTE2NDcwMTk2NjM5Nw.GEcqgj.Mjaad4g-s70XGZ0XNNUbIGmNDjDOgUrw5-p7Zk")

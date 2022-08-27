@@ -8,10 +8,15 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
 from scrapy.crawler import CrawlerProcess
 import os
+import json
 from os import remove
 from scrapy.exceptions import CloseSpider
 from multiprocessing.context import Process
 
+
+################################
+#Func. ScrappyPPS: Scrapea la info de la pagina principal de PPS
+################################
 def ScrappyPPS():
   
   class Pasantia(Item):
@@ -73,3 +78,66 @@ def ScrappyPPS():
   processPPS = Process(target=crawl)
   processPPS.start()
   processPPS.join()
+
+
+
+
+
+################################
+#Func. ScrappyPPSInicial: Scrapea solo el titulo de la ultima PPS
+################################
+def ScrappyPPSInicial():
+  
+  class PasantiaInicial(Item):
+
+    titulo = Field()
+
+  class FIPasantiasSpiderInicial(Spider):
+    name = "PasantiasSpider"
+
+    custom_settings = {
+        "USER-AGENT":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/71.0.3578.80 Chrome/71.0.3578.80 Safari/537.36"
+    }
+    start_urls = ['https://www.facet.unt.edu.ar/sbe/pasantias-y-pps/']
+
+    def parse(self, response):
+        sel = Selector(response)
+        p = sel.xpath("//div[@id='panel-194-0-0-0']//article[contains(@id, 'post-')][1]")
+
+        item = ItemLoader(PasantiaInicial(), p)  
+        item.add_xpath("titulo", ".//h1/a/text()")
+      
+        yield item.load_item()
+
+
+  #CORRIENDO SCRAPY SIN LA TERMINAL
+
+  archivo = "pasantias.json"
+
+  if (os.path.isfile(archivo)):
+    remove(archivo)
+
+  def crawl():
+    crawler = CrawlerProcess({
+      'FEED_FORMAT': 'json',
+      'FEED_URI': 'pasantias.json'
+    })
+    crawler.crawl(FIPasantiasSpiderInicial)
+    crawler.start()
+  
+  processPPS = Process(target=crawl)
+  processPPS.start()
+  processPPS.join()
+  
+  #####################
+  #Leo y devuelvo el titulo de la ultima pasantia publicada.
+  #####################
+  
+  ruta = 'pasantias.json'
+  with open(ruta) as contenido:
+    
+    pasantia = json.load(contenido)
+    p = pasantia[0]
+    tituloPPS = p["titulo"][0]
+
+    return tituloPPS
