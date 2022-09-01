@@ -1,5 +1,5 @@
-import discord
 import os
+import discord
 from ScrappyOL import ScrappyOL
 from ScrappyOL import ScrappyOLInicial
 from ScrappyPPS import ScrappyPPS
@@ -10,41 +10,50 @@ from discord.ext import tasks
  
 client = discord.Client()
 
-global ultimaPPS 
-ultimaPPS = ""
 
+#Variables globales que almacenan el titulo de la ultima publicacion
+global ultimaPPS
 global ultimaOL
+ultimaPPS = ""
 ultimaOL = ""
 
-
+#################
+#Funcion "event", respuesta a la interaccion del usuario "hello","search"
+#################
 @client.event
 async def on_message(message):
-  global ultimaPPS
   
   if message.author == client.user:
       return  
   # lower case message
   message_content = message.content.lower()  
-  
+
+  #Para el msj: $hello
   if message.content.startswith(f'$hello'):
     await message.channel.send('Buenos dias, soy un Bot que te mantiene al tanto de las ultimas noticias!!')
-    
+
+  #Para el msj: $search
   if f'$search' in message_content:
     await message.channel.send("Ultima Pasatia y PPS:")
     await message.channel.send(ultimaPPS)
     await message.channel.send("Ultima Oferta Laboral:")
     await message.channel.send(ultimaOL)
-    
+  
 
+#################
+#Funcion para revisar y publicar las ultimas Ofertas Laborales publicadas (cada 30min)
+#################
 @tasks.loop(seconds=1800)
 async def ofertasLaborales():
   
   channel = client.get_channel(1008524480089436261)  
-  
+
+  #Ejecuta Scrappy de OL
   ScrappyOL()
   des=""
   global ultimaOL
-  
+
+  #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'ofertas.json'
   with open(ruta) as contenido:
     
@@ -82,17 +91,20 @@ async def ofertasLaborales():
     
 
 
-
-
+#################
+#Funcion para revisar y publicar las ultimas Pasantias publicadas (cada 30min)
+#################
 @tasks.loop(seconds=1800)
 async def pasantias():
   
   channel = client.get_channel(1008524529171185776)  
-  
+
+  #Ejecuta Scrappy de PPS
   ScrappyPPS()
   des=""
   global ultimaPPS 
-  
+
+  #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'pasantias.json'
   with open(ruta) as contenido:
     
@@ -128,7 +140,10 @@ async def pasantias():
         break
 
 
-
+        
+#################
+#Funcion inicial del servicio, inicia el bot, funciones y corre scrappy para obtener titulo de la ultima publicacion de OL y PPS
+#################
 @client.event
 async def on_ready():
   print(f'{client.user} is now online!')
@@ -142,5 +157,7 @@ async def on_ready():
   
   
 
-
-client.run("MTAwNTU3NTE2NDcwMTk2NjM5Nw.GEcqgj.Mjaad4g-s70XGZ0XNNUbIGmNDjDOgUrw5-p7Zk")
+#################
+#Token del bot de Discord "UBICAR EN OTRO LUGAR"
+#################
+client.run(os.environ["FACETSOCIAL_TOKEN"])
