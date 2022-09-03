@@ -60,6 +60,7 @@ async def ofertasLaborales():
   ScrappyOL()
   des=""
   global ultimaOLTitulo
+  global ultimaOLFecha
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'ofertas.json'
@@ -70,31 +71,33 @@ async def ofertasLaborales():
     for oferta in ofertas:
       of = oferta
       titulo = "".join(of["titulo"])
-
+      fecha = "".join(of["fecha"])
+      link = "".join(of["link"])
+      fechaS = "".join(of["fechaScrappy"])
+      descripcion = of["descripcion"]
+      
+      for d in descripcion:
+        if('\u2022' in d):
+          des = des + "\n" + d
+        elif (':' in d):
+          des = des + d + "\n"
+        else:
+          des = des + d
+    
+      msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
+  
+      des=""
+      
       if (titulo != ultimaOLTitulo):
-        
-        fecha = "".join(of["fecha"])
-        link = "".join(of["link"])
-        descripcion = of["descripcion"]
-    
-        for d in descripcion:
-          if('\u2022' in d):
-            des = des + "\n" + d
-          elif (':' in d):
-            des = des + d + "\n"
-          else:
-            des = des + d
-    
-        msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-
-        
-        des=""
         await channel.send(msgOL)
-
+      elif (titulo == ultimaOLTitulo and fechaS > ultimaOLFecha):
+        await channel.send(msgOL)
       else:
         of = ofertas[0]
         titulo = of["titulo"][0]
+        fechaS = of["fechaScrappy"][0]
         ultimaOLTitulo = titulo
+        ultimaOLFecha = fechaS
         break
     
 
@@ -111,6 +114,7 @@ async def pasantias():
   ScrappyPPS()
   des=""
   global ultimaPPSTitulo 
+  global ultimaPPSFecha 
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'pasantias.json'
@@ -121,30 +125,34 @@ async def pasantias():
     for pasantia in pasantias:
       pas = pasantia
       titulo = "".join(pas["titulo"])
+      fecha = "".join(pas["fecha"])
+      link = "".join(pas["link"])
+      fechaS = "".join(pas["fechaScrappy"])
+      descripcion = pas["descripcion"]
+      
+      for d in descripcion:
+        if ('\u2022' in d):
+          des = des + "\n" + d
+        elif (':' in d):
+          des = des + d + "\n"  
+        else:
+          des = des + d
+    
+      
+      msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
+    
+      des=""
 
       if (titulo != ultimaPPSTitulo):
-        
-        fecha = "".join(pas["fecha"])
-        link = "".join(pas["link"])
-        descripcion = pas["descripcion"]
-    
-        for d in descripcion:
-          if ('\u2022' in d):
-            des = des + "\n" + d
-          elif (':' in d):
-            des = des + d + "\n"  
-          else:
-            des = des + d
-    
-        msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-    
-        des=""
         await channel.send(msgPPS)
-
+      elif (titulo == ultimaPPSTitulo and fechaS > ultimaPPSFecha):
+        await channel.send(msgPPS)
       else:
         pas = pasantias[0]
         titulo = pas["titulo"][0]
+        fechaS = pas["fechaScrappy"][0] 
         ultimaPPSTitulo = titulo
+        ultimaPPSFecha = fecha
         break
 
 
