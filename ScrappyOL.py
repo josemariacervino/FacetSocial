@@ -12,6 +12,7 @@ import json
 from os import remove
 from scrapy.exceptions import CloseSpider
 from multiprocessing.context import Process
+from datetime import datetime
 
 
 
@@ -26,6 +27,7 @@ def ScrappyOL():
     titulo = Field()
     fecha = Field()
     descripcion = Field()
+    fechaScrappy = Field()
 
   class FIOfertasLaboralesSpider(Spider):
     name = "OfertasSpider"
@@ -57,6 +59,8 @@ def ScrappyOL():
               item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
   
           i += 1
+
+          item.add_value("fechaScrappy", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
   
           yield item.load_item()
 
@@ -91,6 +95,7 @@ def ScrappyOLInicial():
   
   class Oferta(Item):
     titulo = Field()
+    fechaScrappy = Field()
     
   class FIOfertasLaboralesSpider(Spider):
     name = "OfertasSpider"
@@ -107,6 +112,7 @@ def ScrappyOLInicial():
         
         item = ItemLoader(Oferta(), o)
         item.add_xpath("titulo", ".//h1/a/text()")
+        item.add_value("fechaScrappy", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
    
         yield item.load_item()
 
@@ -140,5 +146,6 @@ def ScrappyOLInicial():
     oferta = json.load(contenido)
     o = oferta[0]
     tituloOL = o["titulo"][0]
+    fechaOL = o["fechaScrappy"][0]
 
-    return tituloOL
+    return (tituloOL, fechaOL)

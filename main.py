@@ -11,14 +11,19 @@ from discord.ext import tasks
 client = discord.Client()
 
 
-#Variables globales que almacenan el titulo de la ultima publicacion
-global ultimaPPS
-global ultimaOL
-ultimaPPS = ""
-ultimaOL = ""
+#Variables globales que almacenan el titulo y fecha de la ultima publicacion
+global ultimaPPSTitulo
+global ultimaPPSFecha
+global ultimaOLTitulo
+global ultimaOLFecha
+ultimaPPSTitulo = ""
+ultimaPPSFecha = ""
+ultimaOLTitulo = ""
+ultimaOLFecha = ""
+
 
 #################
-#Funcion "event", respuesta a la interaccion del usuario "hello","search"
+#Funcion "event", respuesta a la interaccion del usuario "hello","latest"
 #################
 @client.event
 async def on_message(message):
@@ -32,26 +37,29 @@ async def on_message(message):
   if message.content.startswith(f'$hello'):
     await message.channel.send('Buenos dias, soy un Bot que te mantiene al tanto de las ultimas noticias!!')
 
-  #Para el msj: $search
-  if f'$search' in message_content:
-    await message.channel.send("Ultima Pasatia y PPS:")
-    await message.channel.send(ultimaPPS)
-    await message.channel.send("Ultima Oferta Laboral:")
-    await message.channel.send(ultimaOL)
+  #Para el msj: $latest
+  if f'$latest' in message_content:
+    await message.channel.send("__**Ultima Pasatia y PPS:**__")
+    await message.channel.send(ultimaPPSTitulo)
+    await message.channel.send(ultimaPPSFecha)
+    await message.channel.send("__**Ultima Oferta Laboral:**__")
+    await message.channel.send(ultimaOLTitulo)
+    await message.channel.send(ultimaOLFecha)
   
 
 #################
 #Funcion para revisar y publicar las ultimas Ofertas Laborales publicadas (cada 30min)
 #################
+
 @tasks.loop(seconds=1800)
 async def ofertasLaborales():
   
-  channel = client.get_channel(903258671138627605)  
+  channel = client.get_channel(1008524480089436261)  
 
   #Ejecuta Scrappy de OL
   ScrappyOL()
   des=""
-  global ultimaOL
+  global ultimaOLTitulo
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'ofertas.json'
@@ -63,7 +71,7 @@ async def ofertasLaborales():
       of = oferta
       titulo = "".join(of["titulo"])
 
-      if (titulo != ultimaOL):
+      if (titulo != ultimaOLTitulo):
         
         fecha = "".join(of["fecha"])
         link = "".join(of["link"])
@@ -86,7 +94,7 @@ async def ofertasLaborales():
       else:
         of = ofertas[0]
         titulo = of["titulo"][0]
-        ultimaOL = titulo
+        ultimaOLTitulo = titulo
         break
     
 
@@ -97,12 +105,12 @@ async def ofertasLaborales():
 @tasks.loop(seconds=1800)
 async def pasantias():
   
-  channel = client.get_channel(903258541207466034)  
+  channel = client.get_channel(1008524529171185776)  
 
   #Ejecuta Scrappy de PPS
   ScrappyPPS()
   des=""
-  global ultimaPPS 
+  global ultimaPPSTitulo 
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'pasantias.json'
@@ -114,7 +122,7 @@ async def pasantias():
       pas = pasantia
       titulo = "".join(pas["titulo"])
 
-      if (titulo != ultimaPPS):
+      if (titulo != ultimaPPSTitulo):
         
         fecha = "".join(pas["fecha"])
         link = "".join(pas["link"])
@@ -136,7 +144,7 @@ async def pasantias():
       else:
         pas = pasantias[0]
         titulo = pas["titulo"][0]
-        ultimaPPS = titulo
+        ultimaPPSTitulo = titulo
         break
 
 
@@ -144,16 +152,19 @@ async def pasantias():
 #################
 #Funcion inicial del servicio, inicia el bot, funciones y corre scrappy para obtener titulo de la ultima publicacion de OL y PPS
 #################
+
 @client.event
 async def on_ready():
   print(f'{client.user} is now online!')
   ofertasLaborales.start()
   pasantias.start()
 
-  global ultimaPPS
-  ultimaPPS = ScrappyPPSInicial()
-  global ultimaOL
-  ultimaOL = ScrappyOLInicial()
+  global ultimaPPSTitulo
+  global ultimaPPSFecha
+  ultimaPPSTitulo, ultimaPPSFecha = ScrappyPPSInicial()
+  global ultimaOLTitulo
+  global ultimaOLFecha
+  ultimaOLTitulo, ultimaOLFecha = ScrappyOLInicial()
   
   
 
