@@ -46,7 +46,7 @@ async def on_message(message):
 @tasks.loop(seconds=1800)
 async def ofertasLaborales():
   
-  channel = client.get_channel(1008524480089436261)  
+  channel = client.get_channel(903258671138627605)  
 
   #Ejecuta Scrappy de OL
   ScrappyOL()
@@ -97,7 +97,7 @@ async def ofertasLaborales():
 @tasks.loop(seconds=1800)
 async def pasantias():
   
-  channel = client.get_channel(1008524529171185776)  
+  channel = client.get_channel(903258541207466034)  
 
   #Ejecuta Scrappy de PPS
   ScrappyPPS()
