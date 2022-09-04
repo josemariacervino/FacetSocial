@@ -4,6 +4,8 @@ from ScrappyOL import ScrappyOL
 from ScrappyOL import ScrappyOLInicial
 from ScrappyPPS import ScrappyPPS
 from ScrappyPPS import ScrappyPPSInicial
+from ScrappyProcesadores import ScrappyProcesadores
+from ScrappyProcesadores import ScrappyProcesadoresInicial
 import json
 from discord.ext import tasks
 
@@ -13,13 +15,11 @@ client = discord.Client()
 
 #Variables globales que almacenan el titulo y fecha de la ultima publicacion
 global ultimaPPSTitulo
-global ultimaPPSFecha
 global ultimaOLTitulo
-global ultimaOLFecha
+global ultimaNovedadProcesadores
 ultimaPPSTitulo = ""
-ultimaPPSFecha = ""
 ultimaOLTitulo = ""
-ultimaOLFecha = ""
+ultimaNovedadProcesadores=""
 
 
 #################
@@ -41,11 +41,10 @@ async def on_message(message):
   if f'$latest' in message_content:
     await message.channel.send("__**Ultima Pasatia y PPS:**__")
     await message.channel.send(ultimaPPSTitulo)
-    await message.channel.send(ultimaPPSFecha)
     await message.channel.send("__**Ultima Oferta Laboral:**__")
     await message.channel.send(ultimaOLTitulo)
-    await message.channel.send(ultimaOLFecha)
-  
+    await message.channel.send("__**Ultima Novedad de Sist. con Microprocesadores:**__")
+    await message.channel.send(ultimaNovedadProcesadores)
 
 #################
 #Funcion para revisar y publicar las ultimas Ofertas Laborales publicadas (cada 30min)
@@ -54,13 +53,15 @@ async def on_message(message):
 @tasks.loop(seconds=1800)
 async def ofertasLaborales():
   
-  channel = client.get_channel(1008524480089436261)  
+  #Canal de la FACET Social Maqueta
+  #channel = client.get_channel(903258671138627605)
+  #Canal de JoMaGo
+  channel = client.get_channel(1008524480089436261)   
 
   #Ejecuta Scrappy de OL
   ScrappyOL()
   des=""
   global ultimaOLTitulo
-  global ultimaOLFecha
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'ofertas.json'
@@ -73,7 +74,6 @@ async def ofertasLaborales():
       titulo = "".join(of["titulo"])
       fecha = "".join(of["fecha"])
       link = "".join(of["link"])
-      fechaS = "".join(of["fechaScrappy"])
       descripcion = of["descripcion"]
       
       for d in descripcion:
@@ -90,14 +90,10 @@ async def ofertasLaborales():
       
       if (titulo != ultimaOLTitulo):
         await channel.send(msgOL)
-      elif (titulo == ultimaOLTitulo and fechaS > ultimaOLFecha):
-        await channel.send(msgOL)
       else:
         of = ofertas[0]
         titulo = of["titulo"][0]
-        fechaS = of["fechaScrappy"][0]
         ultimaOLTitulo = titulo
-        ultimaOLFecha = fechaS
         break
     
 
@@ -108,13 +104,15 @@ async def ofertasLaborales():
 @tasks.loop(seconds=1800)
 async def pasantias():
   
+  #Canal de la FACET Social Maqueta
+  #channel = client.get_channel(903258541207466034)
+  #Canal de JoMaGo
   channel = client.get_channel(1008524529171185776)  
 
   #Ejecuta Scrappy de PPS
   ScrappyPPS()
   des=""
-  global ultimaPPSTitulo 
-  global ultimaPPSFecha 
+  global ultimaPPSTitulo
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'pasantias.json'
@@ -127,7 +125,6 @@ async def pasantias():
       titulo = "".join(pas["titulo"])
       fecha = "".join(pas["fecha"])
       link = "".join(pas["link"])
-      fechaS = "".join(pas["fechaScrappy"])
       descripcion = pas["descripcion"]
       
       for d in descripcion:
@@ -145,34 +142,67 @@ async def pasantias():
 
       if (titulo != ultimaPPSTitulo):
         await channel.send(msgPPS)
-      elif (titulo == ultimaPPSTitulo and fechaS > ultimaPPSFecha):
-        await channel.send(msgPPS)
       else:
         pas = pasantias[0]
         titulo = pas["titulo"][0]
-        fechaS = pas["fechaScrappy"][0] 
         ultimaPPSTitulo = titulo
-        ultimaPPSFecha = fecha
         break
 
 
+#################
+#Funcion para revisar y publicar las ultimas novedades publicadas de Microprocesadoes (cada 15min)
+#################
+@tasks.loop(seconds=900)
+async def novedadesProcesarores():
+
+  #Canal de la FACET Social Maqueta
+  #channel = client.get_channel(1016006450004361226)
+  #Canal de JoMaGo
+  channel = client.get_channel(1016006787796832266)
+
+  #Ejecuta Scrappy de Procesadores
+  ScrappyProcesadores()
+  global ultimaNovedadProcesadores
+
+  #Lee el archivo y publicar publicaciones nuevas si es que hay
+  ruta = 'novedadesProcesadores.json'
+  with open(ruta) as contenido:
+    
+    novedades = json.load(contenido)
+    
+    for novedad in novedades:
+      nov = novedad
+      fecha = "".join(nov["fecha"])
+      descripcion = "".join(nov["descripcion"][0])
+          
+      msgProcesadores = "📢 __**Nueva publicación**__\n\n"+descripcion+"**\n\nFecha: **"+fecha+"\n\n\n🔗 __**Links de Secciones:**__\n\n"+"***-📰 Cartelera de Novedades:***\n"+"https://microprocesadores.unt.edu.ar/procesadores/"+"\n***-📚 Diapositivas:***\n"+"https://microprocesadores.unt.edu.ar/procesadores/downloads/type/0/"+"\n***-📝 Prácticos/Laboratorios:***\n"+"https://microprocesadores.unt.edu.ar/procesadores/downloads/assignments/"+" \n\n"+"═════════════════"
+    
+      if (descripcion != ultimaNovedadProcesadores):
+        await channel.send(msgProcesadores)
+      else:
+        nov = novedades[0]
+        descripcion = "".join(nov["descripcion"][0])
+        ultimaNovedadProcesadores = descripcion
+        break
         
 #################
 #Funcion inicial del servicio, inicia el bot, funciones y corre scrappy para obtener titulo de la ultima publicacion de OL y PPS
 #################
+
 
 @client.event
 async def on_ready():
   print(f'{client.user} is now online!')
   ofertasLaborales.start()
   pasantias.start()
+  novedadesProcesarores.start()
 
   global ultimaPPSTitulo
-  global ultimaPPSFecha
-  ultimaPPSTitulo, ultimaPPSFecha = ScrappyPPSInicial()
+  ultimaPPSTitulo = ScrappyPPSInicial()
   global ultimaOLTitulo
-  global ultimaOLFecha
-  ultimaOLTitulo, ultimaOLFecha = ScrappyOLInicial()
+  ultimaOLTitulo = ScrappyOLInicial()
+  global ultimaNovedadProcesadores
+  ultimaNovedadProcesadores = ScrappyProcesadoresInicial()
   
   
 

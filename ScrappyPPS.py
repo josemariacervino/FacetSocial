@@ -12,7 +12,6 @@ import json
 from os import remove
 from scrapy.exceptions import CloseSpider
 from multiprocessing.context import Process
-from datetime import datetime
 
 
 
@@ -27,7 +26,6 @@ def ScrappyPPS():
     titulo = Field()
     fecha = Field()
     descripcion = Field()
-    fechaScrappy = Field()
 
   class FIPasantiasSpider(Spider):
     name = "PasantiasSpider"
@@ -59,7 +57,6 @@ def ScrappyPPS():
               item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
   
           i += 1
-          item.add_value("fechaScrappy", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
   
           yield item.load_item()
 
@@ -93,9 +90,7 @@ def ScrappyPPS():
 def ScrappyPPSInicial():
   
   class PasantiaInicial(Item):
-
     titulo = Field()
-    fechaScrappy = Field()
 
   class FIPasantiasSpiderInicial(Spider):
     name = "PasantiasSpider"
@@ -111,7 +106,6 @@ def ScrappyPPSInicial():
 
         item = ItemLoader(PasantiaInicial(), p)  
         item.add_xpath("titulo", ".//h1/a/text()")
-        item.add_value("fechaScrappy", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
       
         yield item.load_item()
 
@@ -145,6 +139,5 @@ def ScrappyPPSInicial():
     pasantia = json.load(contenido)
     p = pasantia[0]
     tituloPPS = p["titulo"][0]
-    fechaPPS = p["fechaScrappy"][0]
 
-    return (tituloPPS, fechaPPS)
+    return tituloPPS
