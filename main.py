@@ -17,6 +17,7 @@ client = discord.Client()
 global ultimaPPSTitulo
 global ultimaOLTitulo
 global ultimaNovedadProcesadores
+
 ultimaPPSTitulo = ""
 ultimaOLTitulo = ""
 ultimaNovedadProcesadores=""
@@ -74,18 +75,25 @@ async def ofertasLaborales():
       titulo = "".join(of["titulo"])
       fecha = "".join(of["fecha"])
       link = "".join(of["link"])
-      descripcion = of["descripcion"]
-      
+      descripcion = of["descripcion"][0]
+
       for d in descripcion:
-        if('\u2022' in d):
-          des = des + "\n" + d
+        if ('\n\u2022' in d):
+          des = des + d.strip("\t")
+        elif ('\u2022' in d):
+          des = des + "\n" + d.strip("\t")
+        elif ('\u27a2' in d):
+          des = des + "\n" + d.strip("\t")
+        elif ('\n' in d):
+          #des = des + "\n" + d.strip("\t")
+          des = des + d.strip("\t")
         elif (':' in d):
-          des = des + d + "\n"
+          des = des + d.strip("\t") + "\n"
         else:
-          des = des + d
-    
+          des = des + d.strip("\t")
+        
       msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-  
+
       des=""
       
       if (titulo != ultimaOLTitulo):
@@ -125,16 +133,23 @@ async def pasantias():
       titulo = "".join(pas["titulo"])
       fecha = "".join(pas["fecha"])
       link = "".join(pas["link"])
-      descripcion = pas["descripcion"]
+      descripcion = pas["descripcion"][0]
       
       for d in descripcion:
-        if ('\u2022' in d):
-          des = des + "\n" + d
+        if ('\n\u2022' in d):
+          des = des + d.strip("\t")
+        elif ('\u2022' in d):
+          des = des + "\n" + d.strip("\t")
+        elif ('\u27a2' in d):
+          des = des + "\n" + d.strip("\t")
+        elif ('\n' in d):
+          #des = des + "\n" + d.strip("\t")
+          des = des + d.strip("\t")
         elif (':' in d):
-          des = des + d + "\n"  
+          des = des + d.strip("\t") + "\n"
         else:
-          des = des + d
-    
+          des = des + d.strip("\t")
+
       
       msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
     
@@ -198,11 +213,12 @@ async def on_ready():
   novedadesProcesarores.start()
 
   global ultimaPPSTitulo
-  ultimaPPSTitulo = ScrappyPPSInicial()
   global ultimaOLTitulo
-  ultimaOLTitulo = ScrappyOLInicial()
   global ultimaNovedadProcesadores
-  ultimaNovedadProcesadores = ScrappyProcesadoresInicial()
+  
+  #ultimaPPSTitulo = ScrappyPPSInicial()
+  #ultimaOLTitulo = ScrappyOLInicial()
+  #ultimaNovedadProcesadores = ScrappyProcesadoresInicial()
   
   
 

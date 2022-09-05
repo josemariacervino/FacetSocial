@@ -49,12 +49,8 @@ def ScrappyPPS():
           item.add_xpath("titulo", ".//h1/a/text()")
           item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
   
-          x = p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-  
-          if x == []:
-              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
-          else:
-              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
+          d = [x.xpath(".//text()").extract() for x in p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]")]
+          item.add_value("descripcion", d)
   
           i += 1
   

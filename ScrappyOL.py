@@ -48,14 +48,11 @@ def ScrappyOL():
           item.add_xpath("link",".//h1/a/@href")
           item.add_xpath("titulo", ".//h1/a/text()")
           item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
+          
+          d = [x.xpath(".//text()").extract() for x in o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]")]
+          item.add_value("descripcion", d)
   
-          x = o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-  
-          if x == []:
-              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/text()")
-          else:
-              item.add_xpath("descripcion", ".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]/p/span/text()")
-  
+          
           i += 1
   
           yield item.load_item()
