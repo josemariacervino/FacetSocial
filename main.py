@@ -6,6 +6,8 @@ from ScrappyPPS import ScrappyPPS
 from ScrappyPPS import ScrappyPPSInicial
 from ScrappyProcesadores import ScrappyProcesadores
 from ScrappyProcesadores import ScrappyProcesadoresInicial
+from ScrappyTD import ScrappyTD
+from ScrappyTD import ScrappyTDInicial
 import json
 from discord.ext import tasks
 
@@ -17,10 +19,13 @@ client = discord.Client()
 global ultimaPPSTitulo
 global ultimaOLTitulo
 global ultimaNovedadProcesadores
+global ultimaNovedadTD
 
 ultimaPPSTitulo = ""
 ultimaOLTitulo = ""
-ultimaNovedadProcesadores=""
+ultimaNovedadProcesadores="Están publicadas las dispositivas de clase correspondientes al Tema 03 (Descripción Funcional de un microprocesador)."
+ultimaNovedadTD=""
+
 
 
 #################
@@ -40,12 +45,14 @@ async def on_message(message):
 
   #Para el msj: $latest
   if f'$latest' in message_content:
-    await message.channel.send("__**Ultima Pasatia y PPS:**__")
-    await message.channel.send(ultimaPPSTitulo)
-    await message.channel.send("__**Ultima Oferta Laboral:**__")
-    await message.channel.send(ultimaOLTitulo)
+    #await message.channel.send("__**Ultima Pasatia y PPS:**__")
+    #await message.channel.send(ultimaPPSTitulo)
+    #await message.channel.send("__**Ultima Oferta Laboral:**__")
+    #await message.channel.send(ultimaOLTitulo)
     await message.channel.send("__**Ultima Novedad de Sist. con Microprocesadores:**__")
     await message.channel.send(ultimaNovedadProcesadores)
+    #await message.channel.send("__**Ultima Novedad de Transmisiones de Datos:**__")
+    #await message.channel.send(ultimaNovedadTD)
 
 #################
 #Funcion para revisar y publicar las ultimas Ofertas Laborales publicadas (cada 30min)
@@ -192,34 +199,77 @@ async def novedadesProcesarores():
           
       msgProcesadores = "📢 __**Nueva publicación**__\n\n"+descripcion+"**\n\nFecha: **"+fecha+"\n\n\n🔗 __**Links de Secciones:**__\n\n"+"***-📰 Cartelera de Novedades:***\n"+"https://microprocesadores.unt.edu.ar/procesadores/"+"\n***-📚 Diapositivas:***\n"+"https://microprocesadores.unt.edu.ar/procesadores/downloads/type/0/"+"\n***-📝 Prácticos/Laboratorios:***\n"+"https://microprocesadores.unt.edu.ar/procesadores/downloads/assignments/"+" \n\n"+"═════════════════"
     
-      if (descripcion != ultimaNovedadProcesadores):
+      if(descripcion != ultimaNovedadProcesadores):
         await channel.send(msgProcesadores)
       else:
         nov = novedades[0]
         descripcion = "".join(nov["descripcion"][0])
         ultimaNovedadProcesadores = descripcion
         break
+
+
+
+
+#################
+#Funcion para revisar y publicar las ultimas novedades publicadas de Trans. de Datos (cada 15min)
+#################
+@tasks.loop(seconds=960)
+async def novedadesTD():
+
+  #Canal de la FACET Social Maqueta
+  #channel = client.get_channel(1016424481322979328)
+  #Canal de JoMaGo
+  channel = client.get_channel(1016424348694876231)
+
+  #Ejecuta Scrappy de Trans. de Datos
+  ScrappyTD()
+  global ultimaNovedadTD
+
+  #Lee el archivo y publicar publicaciones nuevas si es que hay
+  ruta = 'novedadesTD.json'
+  with open(ruta) as contenido:
+    
+    novedades = json.load(contenido)
+    
+    for novedad in novedades:
+      nov = novedad
+      fecha = "".join(nov["fecha"])
+      descripcion = "".join(nov["descripcion"][0])
+          
+      msgTD = "📢 __**Nueva publicación**__\n\n"+descripcion+"**\n\nFecha: **"+fecha+"\n\n\n🔗 __**Links de Secciones:**__\n\n"+"***-📰 Cartelera de Novedades:***\n"+"https://microprocesadores.unt.edu.ar/transmision/"+"\n***-📚 Diapositivas:***\n"+"https://microprocesadores.unt.edu.ar/transmision/downloads/type/0/"+"\n***-📝 Prácticos/Laboratorios:***\n"+"https://microprocesadores.unt.edu.ar/transmision/downloads/assignments/"+" \n\n"+"═════════════════"
+    
+      if (descripcion != ultimaNovedadTD):
+        await channel.send(msgTD)
+      else:
+        nov = novedades[0]
+        descripcion = "".join(nov["descripcion"][0])
+        ultimaNovedadTD = descripcion
+        break
+
+        
         
 #################
-#Funcion inicial del servicio, inicia el bot, funciones y corre scrappy para obtener titulo de la ultima publicacion de OL y PPS
+#Funcion inicial del servicio, inicia el bot y funciones
 #################
 
 
 @client.event
 async def on_ready():
   print(f'{client.user} is now online!')
-  ofertasLaborales.start()
-  pasantias.start()
+  #ofertasLaborales.start()
+  #pasantias.start()
   novedadesProcesarores.start()
+  #novedadesTD.start()
 
   global ultimaPPSTitulo
   global ultimaOLTitulo
   global ultimaNovedadProcesadores
+  global ultimaNovedadTD
   
   #ultimaPPSTitulo = ScrappyPPSInicial()
   #ultimaOLTitulo = ScrappyOLInicial()
   #ultimaNovedadProcesadores = ScrappyProcesadoresInicial()
-  
+  #ultimaNovedadTD = ScrappyTDInicial()
   
 
 #################
