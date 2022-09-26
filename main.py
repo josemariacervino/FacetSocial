@@ -47,11 +47,8 @@ async def on_message(message):
   if f'$latest' in message_content:
     await message.channel.send("__**Ultima Pasatia y PPS:**__")
     await message.channel.send(ultimaPPSId+"\n"+ultimaPPSTitulo+"\n"+ultimaPPSDes)
-    #await message.channel.send(ultimaPPSTitulo)
-    #await message.channel.send(ultimaPPSDes)
-
-    #await message.channel.send("__**Ultima Oferta Laboral:**__")
-    #await message.channel.send(ultimaOLTitulo)
+    await message.channel.send("__**Ultima Oferta Laboral:**__")
+    await message.channel.send(ultimaOLId+"\n"+ultimaOLTitulo+"\n"+ultimaOLDes)
     #await message.channel.send("__**Ultima Novedad de Sist. con Microprocesadores:**__")
     #await message.channel.send(ultimaNovedadProcesadores)
     #await message.channel.send("__**Ultima Novedad de Transmisiones de Datos:**__")
@@ -72,7 +69,7 @@ async def ofertasLaborales():
   #Ejecuta Scrappy de OL
   ScrappyOL()
   des=""
-  global ultimaOLTitulo
+  global ultimaOLId,ultimaOLTitulo,ultimaOLDes
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'ofertas.json'
@@ -81,7 +78,9 @@ async def ofertasLaborales():
     ofertas = json.load(contenido)
 
     for oferta in ofertas:
+      des=""
       of = oferta
+      id = "".join(of["id"])
       titulo = "".join(of["titulo"])
       fecha = "".join(of["fecha"])
       link = "".join(of["link"])
@@ -104,16 +103,21 @@ async def ofertasLaborales():
         
       msgOL = "__**Ofertas Laborales**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
 
-      des=""
       
-      if (titulo != ultimaOLTitulo):
-        await channel.send(msgOL)
+      if(id == ultimaOLId):
+        if(titulo == ultimaOLTitulo):
+          if(des == ultimaOLDes):
+            break
+          else:
+            await channel.send(msgOL)
+            ultimaOLId,ultimaOLTitulo,ultimaOLDes = ScrappyOLInicial()
+            break
+        else:
+          await channel.send(msgOL)
+          ultimaOLId,ultimaOLTitulo,ultimaOLDes = ScrappyOLInicial()
+          break
       else:
-        of = ofertas[0]
-        titulo = of["titulo"][0]
-        ultimaOLTitulo = titulo
-        break
-    
+        await channel.send(msgOL)  
 
 
 #################
@@ -165,14 +169,7 @@ async def pasantias():
       
       msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
 
-      #if (titulo != ultimaPPSTitulo):        
-        #await channel.send(msgPPS)
-      #else:
-        #pas = pasantias[0]
-        #titulo = pas["titulo"][0]
-        #ultimaPPSTitulo = titulo
-        #break
-
+      
       if(id == ultimaPPSId):
         if(titulo == ultimaPPSTitulo):
           if(des == ultimaPPSDes):
@@ -276,7 +273,7 @@ async def novedadesTD():
 async def on_ready():
   print(f'{client.user} is now online!')
   ofertasLaborales.start()
-  #pasantias.start()
+  pasantias.start()
   #novedadesProcesarores.start()
   #novedadesTD.start()
 
@@ -285,7 +282,7 @@ async def on_ready():
   global ultimaNovedadProcesadores
   global ultimaNovedadTD
   
-  #ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes = ScrappyPPSInicial()
+  ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes = ScrappyPPSInicial()
   ultimaOLId,ultimaOLTitulo,ultimaOLDes = ScrappyOLInicial()
   #ultimaNovedadProcesadores = ScrappyProcesadoresInicial()
   #ultimaNovedadTD = ScrappyTDInicial()

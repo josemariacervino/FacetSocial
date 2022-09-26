@@ -39,12 +39,11 @@ def ScrappyOL():
         sel = Selector(response)
         listaOfertas = sel.xpath("//div[@id='primary']//div[@class='entry-content']//article[contains(@id, 'post-')]")
         
-        i = 0
         for o in listaOfertas:
         
           item = ItemLoader(Oferta(), o)
   
-          item.add_value("id", i)
+          item.add_xpath("id","@id")
           item.add_xpath("link",".//h1/a/@href")
           item.add_xpath("titulo", ".//h1/a/text()")
           item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
@@ -52,8 +51,6 @@ def ScrappyOL():
           d = [x.xpath(".//text()").extract() for x in o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]")]
           item.add_value("descripcion", d)
   
-          
-          i += 1
   
           yield item.load_item()
 
@@ -87,7 +84,9 @@ def ScrappyOL():
 def ScrappyOLInicial():
   
   class Oferta(Item):
+    id = Field()
     titulo = Field()
+    descripcion = Field()
     
   class FIOfertasLaboralesSpider(Spider):
     name = "OfertasSpider"
@@ -103,7 +102,12 @@ def ScrappyOLInicial():
         
         
         item = ItemLoader(Oferta(), o)
+
+        item.add_xpath("id","@id")
         item.add_xpath("titulo", ".//h1/a/text()")
+        
+        d = [x.xpath(".//text()").extract() for x in o.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]")]
+        item.add_value("descripcion", d)
    
         yield item.load_item()
 
@@ -134,8 +138,31 @@ def ScrappyOLInicial():
   ruta = 'ofertas.json'
   with open(ruta) as contenido:
     
-    oferta = json.load(contenido)
-    o = oferta[0]
-    tituloOL = o["titulo"][0]
+    #oferta = json.load(contenido)
+    #o = oferta[0]
+    #tituloOL = o["titulo"][0]
+    
+    des=""
+    ofertas = json.load(contenido)
 
-    return tituloOL
+    of = ofertas[0]
+    idOL = of["id"][0]
+    tituloOL = of["titulo"][0]
+    descripcion = of["descripcion"][0]
+
+    for d in descripcion:
+      if ('\n\u2022' in d):
+        des = des + d.strip("\t")
+      elif ('\u2022' in d):
+        des = des + "\n" + d.strip("\t")
+      elif ('\u27a2' in d):
+        des = des + "\n" + d.strip("\t")
+      elif ('\n' in d):
+        #des = des + "\n" + d.strip("\t")
+        des = des + d.strip("\t")
+      elif (':' in d):
+        des = des + d.strip("\t") + "\n"
+      else:
+        des = des + d.strip("\t")
+  
+    return idOL,tituloOL,des

@@ -136,12 +136,7 @@ def ScrappyPPSInicial():
   #####################
   
   ruta = 'pasantias.json'
-  with open(ruta) as contenido:
-    
-    #pasantia = json.load(contenido)
-    #p = pasantia[0]
-    #tituloPPS = p["titulo"][0]
-    
+  with open(ruta) as contenido:  
     des=""
     pasantias = json.load(contenido)
 
