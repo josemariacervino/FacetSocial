@@ -16,14 +16,14 @@ client = discord.Client()
 
 
 #Variables globales que almacenan el titulo y fecha de la ultima publicacion
-global ultimaPPSTitulo
-global ultimaOLTitulo
+global ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes
+global ultimaOLId,ultimaOLTitulo,ultimaOLDes
 global ultimaNovedadProcesadores
 global ultimaNovedadTD
 
-ultimaPPSTitulo = ""
-ultimaOLTitulo = ""
-ultimaNovedadProcesadores="Están publicadas las dispositivas de clase correspondientes al Tema 03 (Descripción Funcional de un microprocesador)."
+ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes = "","",""
+ultimaOLId,ultimaOLTitulo,ultimaOLDes = "","",""
+ultimaNovedadProcesadores=""
 ultimaNovedadTD=""
 
 
@@ -45,12 +45,15 @@ async def on_message(message):
 
   #Para el msj: $latest
   if f'$latest' in message_content:
-    #await message.channel.send("__**Ultima Pasatia y PPS:**__")
+    await message.channel.send("__**Ultima Pasatia y PPS:**__")
+    await message.channel.send(ultimaPPSId+"\n"+ultimaPPSTitulo+"\n"+ultimaPPSDes)
     #await message.channel.send(ultimaPPSTitulo)
+    #await message.channel.send(ultimaPPSDes)
+
     #await message.channel.send("__**Ultima Oferta Laboral:**__")
     #await message.channel.send(ultimaOLTitulo)
-    await message.channel.send("__**Ultima Novedad de Sist. con Microprocesadores:**__")
-    await message.channel.send(ultimaNovedadProcesadores)
+    #await message.channel.send("__**Ultima Novedad de Sist. con Microprocesadores:**__")
+    #await message.channel.send(ultimaNovedadProcesadores)
     #await message.channel.send("__**Ultima Novedad de Transmisiones de Datos:**__")
     #await message.channel.send(ultimaNovedadTD)
 
@@ -127,7 +130,7 @@ async def pasantias():
   #Ejecuta Scrappy de PPS
   ScrappyPPS()
   des=""
-  global ultimaPPSTitulo
+  global ultimaPPSTitulo,ultimaPPSId,ultimaPPSDes
 
   #Lee el archivo y publicar publicaciones nuevas si es que hay
   ruta = 'pasantias.json'
@@ -136,7 +139,9 @@ async def pasantias():
     pasantias = json.load(contenido)
     
     for pasantia in pasantias:
+      des=""
       pas = pasantia
+      id = "".join(pas["id"])
       titulo = "".join(pas["titulo"])
       fecha = "".join(pas["fecha"])
       link = "".join(pas["link"])
@@ -159,16 +164,30 @@ async def pasantias():
 
       
       msgPPS = "__**Pasantias y PPS**__\n\n"+"**"+titulo+"**"+" \n"+fecha+" \n\n"+des+" \n\n"+"***Ver mas:  ***"+link+" \n\n"+"═════════════════"
-    
-      des=""
 
-      if (titulo != ultimaPPSTitulo):
-        await channel.send(msgPPS)
+      #if (titulo != ultimaPPSTitulo):        
+        #await channel.send(msgPPS)
+      #else:
+        #pas = pasantias[0]
+        #titulo = pas["titulo"][0]
+        #ultimaPPSTitulo = titulo
+        #break
+
+      if(id == ultimaPPSId):
+        if(titulo == ultimaPPSTitulo):
+          if(des == ultimaPPSDes):
+            break
+          else:
+            await channel.send(msgPPS)
+            ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes = ScrappyPPSInicial()
+            break
+        else:
+          await channel.send(msgPPS)
+          ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes = ScrappyPPSInicial()
+          break
       else:
-        pas = pasantias[0]
-        titulo = pas["titulo"][0]
-        ultimaPPSTitulo = titulo
-        break
+        await channel.send(msgPPS)
+            
 
 
 #################
@@ -256,18 +275,18 @@ async def novedadesTD():
 @client.event
 async def on_ready():
   print(f'{client.user} is now online!')
-  #ofertasLaborales.start()
+  ofertasLaborales.start()
   #pasantias.start()
-  novedadesProcesarores.start()
+  #novedadesProcesarores.start()
   #novedadesTD.start()
 
-  global ultimaPPSTitulo
-  global ultimaOLTitulo
+  global ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes
+  global ultimaOLId,ultimaOLTitulo,ultimaOLDes
   global ultimaNovedadProcesadores
   global ultimaNovedadTD
   
-  #ultimaPPSTitulo = ScrappyPPSInicial()
-  #ultimaOLTitulo = ScrappyOLInicial()
+  #ultimaPPSId,ultimaPPSTitulo,ultimaPPSDes = ScrappyPPSInicial()
+  ultimaOLId,ultimaOLTitulo,ultimaOLDes = ScrappyOLInicial()
   #ultimaNovedadProcesadores = ScrappyProcesadoresInicial()
   #ultimaNovedadTD = ScrappyTDInicial()
   

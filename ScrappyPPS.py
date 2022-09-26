@@ -39,12 +39,11 @@ def ScrappyPPS():
         sel = Selector(response)
         listaPasantia = sel.xpath("//div[@id='panel-194-0-0-0']//article[contains(@id, 'post-')]")
 
-        i = 0
         
         for p in listaPasantia:
           item = ItemLoader(Pasantia(), p)
   
-          item.add_value("id", i)
+          item.add_xpath("id", "@id")
           item.add_xpath("link", ".//h1/a/@href")
           item.add_xpath("titulo", ".//h1/a/text()")
           item.add_xpath("fecha", ".//div[@class='entry-meta']/a/time/text()")
@@ -52,7 +51,6 @@ def ScrappyPPS():
           d = [x.xpath(".//text()").extract() for x in p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]")]
           item.add_value("descripcion", d)
   
-          i += 1
   
           yield item.load_item()
 
@@ -86,7 +84,9 @@ def ScrappyPPS():
 def ScrappyPPSInicial():
   
   class PasantiaInicial(Item):
+    id = Field()
     titulo = Field()
+    descripcion = Field()
 
   class FIPasantiasSpiderInicial(Spider):
     name = "PasantiasSpider"
@@ -101,7 +101,13 @@ def ScrappyPPSInicial():
         p = sel.xpath("//div[@id='panel-194-0-0-0']//article[contains(@id, 'post-')][1]")
 
         item = ItemLoader(PasantiaInicial(), p)  
+
+        item.add_xpath("id", "@id")
         item.add_xpath("titulo", ".//h1/a/text()")
+
+        d = [x.xpath(".//text()").extract() for x in p.xpath(".//div[@class='entry-content']//div[contains(@class,'siteorigin-widget')]")]
+        
+        item.add_value("descripcion", d)  
       
         yield item.load_item()
 
@@ -132,8 +138,31 @@ def ScrappyPPSInicial():
   ruta = 'pasantias.json'
   with open(ruta) as contenido:
     
-    pasantia = json.load(contenido)
-    p = pasantia[0]
-    tituloPPS = p["titulo"][0]
+    #pasantia = json.load(contenido)
+    #p = pasantia[0]
+    #tituloPPS = p["titulo"][0]
+    
+    des=""
+    pasantias = json.load(contenido)
 
-    return tituloPPS
+    pas = pasantias[0]
+    idPPS = pas["id"][0]
+    tituloPPS = pas["titulo"][0]
+    descripcion = pas["descripcion"][0]
+      
+    for d in descripcion:
+        if ('\n\u2022' in d):
+          des = des + d.strip("\t")
+        elif ('\u2022' in d):
+          des = des + "\n" + d.strip("\t")
+        elif ('\u27a2' in d):
+          des = des + "\n" + d.strip("\t")
+        elif ('\n' in d):
+          #des = des + "\n" + d.strip("\t")
+          des = des + d.strip("\t")
+        elif (':' in d):
+          des = des + d.strip("\t") + "\n"
+        else:
+          des = des + d.strip("\t")
+    
+    return idPPS,tituloPPS,des
