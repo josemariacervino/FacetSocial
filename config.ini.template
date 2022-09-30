@@ -1,0 +1,8 @@
+[DISCORD]
+SECRET_TOKEN_BOT = secret_token_bot
+ID_CHANNEL_OFERTAS = id_channel_ofertas
+ID_CHANNEL_PASANTIAS = id_channel_pasantias
+ID_CHANNEL_MICROPROCESADORES = id_channel_microprocesadores
+ID_CHANNEL_TRANSMISION_DE_DATOS = id_channel_transmision_de_datos
+[DEBUG]
+LOG_ENABLED = log_enabled
