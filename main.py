@@ -62,6 +62,22 @@ async def on_message(message):
         await message.channel.send("__**Ultima Novedad de Transmisiones de Datos:**__")
         await message.channel.send(ultimaNovedadTD)
 
+    if f'$pps' in message_content:
+        await message.channel.send("__**Ultima Pasatia y PPS:**__")
+        await message.channel.send(ultimaPPSId + "\n" + ultimaPPSTitulo + "\n" + ultimaPPSDes)
+
+    if f'$ol' in message_content:
+        await message.channel.send("__**Ultima Oferta Laboral:**__")
+        await message.channel.send(ultimaOLId + "\n" + ultimaOLTitulo + "\n" + ultimaOLDes)
+
+    if f'$pro' in message_content:
+        await message.channel.send("__**Ultima Novedad de Sist. con Microprocesadores:**__")
+        await message.channel.send(ultimaNovedadProcesadores)
+
+    if f'$td' in message_content:
+        await message.channel.send("__**Ultima Novedad de Transmisiones de Datos:**__")
+        await message.channel.send(ultimaNovedadTD)
+
 
 #################
 # Funcion para revisar y publicar las ultimas Ofertas Laborales publicadas (cada 30min)
@@ -70,7 +86,7 @@ async def on_message(message):
 @tasks.loop(seconds=1800)
 async def ofertasLaborales():
     # Canal de ofertas laborales
-    channel = client.get_channel(ID_CHANNEL_OFERTAS)
+    channel = client.get_channel(int(ID_CHANNEL_OFERTAS))
 
     # Ejecuta Scrappy de OL
     ScrappyOL()
@@ -112,14 +128,15 @@ async def ofertasLaborales():
             if (id == ultimaOLId):
                 if (titulo == ultimaOLTitulo):
                     if (des == ultimaOLDes):
-                        break
-                    else:
-                        await channel.send(msgOL)
                         ultimaOLId, ultimaOLTitulo, ultimaOLDes = ScrappyOLInicial()
                         break
+                    else:
+                        ultimaOLId, ultimaOLTitulo, ultimaOLDes = ScrappyOLInicial()
+                        await channel.send(msgOL)
+                        break
                 else:
-                    await channel.send(msgOL)
                     ultimaOLId, ultimaOLTitulo, ultimaOLDes = ScrappyOLInicial()
+                    await channel.send(msgOL)
                     break
             else:
                 await channel.send(msgOL)
@@ -130,7 +147,7 @@ async def ofertasLaborales():
 @tasks.loop(seconds=1800)
 async def pasantias():
     # Canal de pasantias
-    channel = client.get_channel(ID_CHANNEL_PASANTIAS)
+    channel = client.get_channel(int(ID_CHANNEL_PASANTIAS))
 
     # Ejecuta Scrappy de PPS
     ScrappyPPS()
@@ -172,14 +189,15 @@ async def pasantias():
             if (id == ultimaPPSId):
                 if (titulo == ultimaPPSTitulo):
                     if (des == ultimaPPSDes):
-                        break
-                    else:
-                        await channel.send(msgPPS)
                         ultimaPPSId, ultimaPPSTitulo, ultimaPPSDes = ScrappyPPSInicial()
                         break
+                    else:
+                        ultimaPPSId, ultimaPPSTitulo, ultimaPPSDes = ScrappyPPSInicial()
+                        await channel.send(msgPPS)
+                        break
                 else:
-                    await channel.send(msgPPS)
                     ultimaPPSId, ultimaPPSTitulo, ultimaPPSDes = ScrappyPPSInicial()
+                    await channel.send(msgPPS)
                     break
             else:
                 await channel.send(msgPPS)
@@ -191,7 +209,7 @@ async def pasantias():
 @tasks.loop(seconds=900)
 async def novedadesProcesarores():
     # Canal de la microprocesadores
-    channel = client.get_channel(ID_CHANNEL_MICROPROCESADORES)
+    channel = client.get_channel(int(ID_CHANNEL_MICROPROCESADORES))
 
     # Ejecuta Scrappy de Procesadores
     ScrappyProcesadores()
@@ -225,7 +243,7 @@ async def novedadesProcesarores():
 @tasks.loop(seconds=960)
 async def novedadesTD():
     # Canal de transmision de datos
-    channel = client.get_channel(ID_CHANNEL_TRANSMISION_DE_DATOS)
+    channel = client.get_channel(int(ID_CHANNEL_TRANSMISION_DE_DATOS))
 
     # Ejecuta Scrappy de Trans. de Datos
     ScrappyTD()
