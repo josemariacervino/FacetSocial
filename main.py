@@ -97,9 +97,9 @@ async def ofertasLaborales():
     ruta = 'ofertas.json'
     with open(ruta) as contenido:
 
-        ofertas = json.load(contenido)
+        ofertaslaborales = json.load(contenido)
 
-        for oferta in ofertas:
+        for oferta in ofertaslaborales:
             des = ""
             of = oferta
             id = "".join(of["id"])
@@ -158,9 +158,9 @@ async def pasantias():
     ruta = 'pasantias.json'
     with open(ruta) as contenido:
 
-        pasantias = json.load(contenido)
+        pasantiasypps = json.load(contenido)
 
-        for pasantia in pasantias:
+        for pasantia in pasantiasypps:
             des = ""
             pas = pasantia
             id = "".join(pas["id"])
